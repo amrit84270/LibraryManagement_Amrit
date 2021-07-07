@@ -1,0 +1,199 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+}
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<script type="text/javascript">
+    function AddEditRecord(id, bookName) {
+        $("#BookName").val(bookName);
+        $("#ID").val(id);
+    }
+    function GetBooks() {
+        debugger;
+        $.ajax({
+            type: "GET",
+            url: "/api/BooksApi",
+            data: '{}',
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                $("#tab1").css("display", "block");
+                $.each(response, function (key, val) {
+                    $("<tr class='even pointer'><td width='180px'>" + val.id + "</td><td width='180px'>" + val.name + "</td><td width='180px'>" + val.author + "</td><td width='240px'>" + "<button class='btn btn-warning btn-xs' onclick='AddEditRecord(" + val.id + ',"' + val.name + '","' + val.author + '"' + ");'" + ">Edit</button> <button class='btn btn-danger btn-xs' onclick='DeleteRecord(" + val.id + ");'" + ">Delete</button>" + "</td></tr>").appendTo($("#tab1"));
+                })
+            },
+            failure: function (response) {
+                alert(response.responseText);
+            },
+            error: function (response) {
+                alert(response.responseText);
+            }
+        });
+    }
+
+    function DeleteRecord(id) {
+        //alert(id);
+        $.ajax({
+
+            type: "DELETE",
+
+            contentType: "application/json;charset=utf-8",
+
+            url: "/api/BooksApi/" + id,
+
+            data: JSON.stringify({
+                id: id,
+            }),
+            dataType: "JSON",
+            success: function (data) {
+                alert('Record Has been deleted successfully.');
+                $("#tab1").find("tr:gt(0)").remove();
+                $.getJSON("/api/BooksApi/", function (data) {
+                    $("#tab1").css("display", "block");
+                    $.each(data, function (key, val) {
+                        $("<tr class='even pointer'><td width='180px'>" + val.id + "</td><td width='180px'>" + val.name + "</td><td width='180px'>" + val.author + "</td><td width='240px'>" + "<button class='btn btn-warning btn-xs' onclick='AddEditRecord(" + val.id + ',"' + val.name + '","' + val.name + '"' + ");'" + ">Edit</button> <button class='btn btn-danger btn-xs' onclick='DeleteRecord(" + val.id + ");'" + ">Delete</button>" + "</td></tr>").appendTo($("#tab1"));
+                    })
+
+                })
+            }
+        });
+    }
+
+
+    $(document).ready(function () {
+        //alert('hi');
+        GetBooks();
+        $('#btn1').click(function () {
+            debugger;
+            $.ajax({
+                type: 'POST',
+                url: '/api/BooksApi',
+                data: JSON.stringify({
+                    Name: $("#BookName").val(),
+                    Author: $("#AuthorName").val(),
+                }),
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    alert("Data has been saved successfully");
+                    $("#ID").val('');
+                    $("#tab1").find("tr:gt(0)").remove();
+                    $.getJSON("/api/BooksApi/", function (data) {
+                        $("#tab1").css("display", "block");
+                        $.each(data, function (key, val) {
+                            $("<tr class='even pointer'><td width='180px'>" + val.id + "</td><td width='180px'>" + val.name + "</td><td width='180px'>" + val.author + "</td><td width='240px'>" + "<button class='btn btn-warning btn-xs' onclick='AddEditRecord(" + val.id + ',"' + val.name + '","' + val.author + '"' + ");'" + ">Edit</button> <button class='btn btn-danger btn-xs' onclick='DeleteRecord(" + val.id + ");'" + ">Delete</button>" + "</td></tr>").appendTo($("#tab1"));
+                        });
+                    });
+                    $("#BookName").val('');
+                    $("#AuthorName").val('');
+
+                },
+                error: function (msg) {
+                    alert('Data has not been saved successfully');
+                }
+            });
+        });
+
+        $('#btn2').click(function () {
+            //alert('hi');
+            $.ajax({
+                url: "/api/BooksApi/" + parseInt($("#ID").val()),
+                method: "PUT",
+                data: JSON.stringify({
+                    ID: parseInt($("#ID").val()),
+                    Name: $("#BookName").val(),
+                    Author: $("#AuthorName").val(),
+                }),
+                dataType: "JSON",
+                contentType: 'application/json; charset=UTF-8',
+                success: function (data) {
+                    alert('Your record has been updated successfully.');
+                    $("#tab1").find("tr:gt(0)").remove();
+                    $.getJSON("/api/BooksApi/", function (data) {
+                        $("#tab1").css("display", "block");
+                        $.each(data, function (key, val) {
+                            $("<tr class='even pointer'><td width='180px'>" + val.id + "</td><td width='180px'>" + val.name + "</td><td width='180px'>" + val.author + "</td><td width='240px'>" + "<button class='btn btn-warning btn-xs' onclick='AddEditRecord(" + val.id + ',"' + val.name + '","' + val.name + '"' + ");'" + ">Edit</button> <button class='btn btn-danger btn-xs' onclick='DeleteRecord(" + val.id + ");'" + ">Delete</button>" + "</td></tr>").appendTo($("#tab1"));
+                        })
+                    })
+
+                }
+            });
+        });
+    });
+</script>
+
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Category</h2>
+
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <br />
+                <form id="demo-form2" data-parsley-validate class="form-horizontal form-label-left">
+                    <div class="form-group">
+                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">
+                            Book Name <span class="required">*</span>
+                        </label>
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <input type="text" id="BookName" required="required" class="form-control col-md-7 col-xs-12" name="BookName">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">
+                            Book Author <span class="required">*</span>
+                        </label>
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <input type="text" id="AuthorName" required="required" class="form-control col-md-7 col-xs-12" name="AuthorName">
+                        </div>
+                    </div>
+
+
+
+                    <div class="ln_solid"></div>
+                    <input type="hidden" id="ID" name="ID" />
+                    <div class="form-group">
+                        <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
+                            <button type="button" class="btn btn-primary" id="btn1">Save</button>
+                            <button type="button" class="btn btn-outline-danger" id="btn2">Update</button>
+
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="clearfix"></div>
+<div class="col-md-12 col-sm-12 col-xs-12">
+    <div class="x_panel">
+        <div class="x_title">
+            <h2>Book List</h2>
+
+            <div class="clearfix"></div>
+        </div>
+        <div class="x_content">
+            <div class="table-responsive">
+                <table class="table table-bordered table-primary jambo_table bulk_action" id="tab1">
+                    <tr class="headings">
+                        <th class="column-title" width="180px"># </th>
+                        <th class="column-title" width="380px">Book Name </th>
+                        <th class="column-title" width="380px">Author Name </th>
+
+                        <th class="column-title no-link last" width="240px">
+                            <span class="nobr">Action</span>
+                        </th>
+                    </tr>
+
+                </table>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
